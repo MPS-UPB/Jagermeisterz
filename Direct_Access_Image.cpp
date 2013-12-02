@@ -275,6 +275,56 @@ bool KImage::GaussianBlur(double dblRadius)
 
 //===========================================================================
 //===========================================================================
+int KImage::getBinarizationThreshold(){
+	/////////////////////////////////////////
+	//	Determines the binarization threshold 
+	//  based on Otsu's algorithm
+	/////////////////////////////////////////
+
+	if(GetBPP() != 8)
+		return -1;
+
+	int total = intHeight * intWidth;
+	float sum = 0;
+	float sumB = 0;
+	int wB = 0;
+	int wF = 0;
+	float varMax = 0;
+	int threshold = 0;
+	
+	for(int i = 0; i < 256; i++){
+		sum += i * imageHistogram[i];
+	}
+
+	for(int i = 0; i < 256; i++){
+		wB += imageHistogram[i];
+		if(wB == 0)
+			continue;
+
+		wF = total - wB;
+
+		if(wF == 0)
+			break;
+ 
+		sumB += (float)(i*imageHistogram[i]);
+		float mB = sumB/wB;
+		float mF = (sum - sumB)/wF;
+
+		float varBetween = (float)wB * (float)wF * (mB-mF) * (mB-mF);
+		if(varBetween > varMax){
+			varMax = varBetween;
+			threshold = i;
+		}
+	}
+        
+    return threshold;
+}
+//===========================================================================
+//===========================================================================
+
+
+//===========================================================================
+//===========================================================================
 //!Legacy code; will simply save a JPEG_QUALITYSUPERB
 bool KImage::Reset_JP2K_Codec()
 { 

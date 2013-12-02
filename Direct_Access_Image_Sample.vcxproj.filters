@@ -35,10 +35,10 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Direct_Access_Image_Sample.cpp">
+    <ClCompile Include="Direct_Access_Image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Direct_Access_Image.cpp">
+    <ClCompile Include="ImageBinarization.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

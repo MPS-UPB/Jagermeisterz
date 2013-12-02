@@ -168,6 +168,7 @@ protected:
 
 private:
     BYTE **pDataMatrix;		// pointer to lines table of image
+	int imageHistogram[256];
     FIBITMAP *fbit;
     bool boolHasDirectAccess, boolIsValid;
 
@@ -359,6 +360,7 @@ public:
         return pDataMatrix;
     }
 
+	
     bool ValidateCoordinates(int x, int y)
     {
         if (x < 0 || x >= intWidth || y < 0 || y >= intHeight) 
@@ -616,9 +618,40 @@ public:
         return false;
     }
 
+	BYTE getHistogramElement(BYTE index){
+		return imageHistogram[index];
+	}
+
+	bool initImageHistogram(){
+		if(GetBPP() != 8)
+			return false;
+
+		for (int i = 0; i < 256; i++){
+			imageHistogram[i] = 0;
+		}
+		return true;
+	}
+
+	bool createImageHistogram(){
+		if(GetBPP() != 8)
+			return false;
+
+		for (int y = intHeight - 1; y >= 0; y--){
+            for (int x = intWidth - 1; x >= 0; x--){
+				BYTE pixel = Get8BPPPixel(x, y);
+				imageHistogram[pixel]++;
+			}
+		}
+
+		return true;
+	}
+
+	int getBinarizationThreshold();
+
     static void __GaussianBlurOneChannel(int intImageWidth, int intImageHeight, 
         BYTE ** pLineInput, BYTE ** pLineOutput, double dblRadius); 
     bool GaussianBlur(double dblRadius);
+
 };
 //===========================================================================
 //===========================================================================
