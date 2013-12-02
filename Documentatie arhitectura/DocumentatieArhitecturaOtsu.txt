@@ -1,0 +1,21 @@
+Fatu Mihai Alin 342 C5
+Nicolae Mihaiu 342 C5
+Petcu Alexandru 342 C5
+
+Echipa Jagermeisterz
+
+					
+					BAM Otsu
+	
+	Echipa noastra a folosit scheletul de cod oferit pe forum pentru a implementa un modul BAM
+folosind algoritmul lui Otsu pentru a binariza imaginea data.
+	Algoritmul lui Otsu primeste o imagine greyscale si o transforma in imagine binara. Algoritmul
+imparte cele pixelii din imagini in 2 clase si apoi calculeaza pragul optim ce separa cele 2 clase 
+astfel incat variatia intra-clase sa fie minima. Se calculeaza histograma si probabilitatile pentru 
+fiecare nivel de intesitate de la 1 la 255. Otsu a aratat ca a minimiza varianta intra-clase este
+acelasi lucru cu maximizarea variatiei inter-clase. Astfel, vom alege pragurile cu cele mai mari 2 
+variatii inter-clase. Pragul dorit este media aritmetica a celor 2 maxime gasite.
+
+
+				
+
