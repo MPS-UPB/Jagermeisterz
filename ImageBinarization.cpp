@@ -77,20 +77,37 @@ int _tmain(int argc, _TCHAR* argv[])
         {
 			if(pImageConfidence->BeginDirectAccess()){
 				int newPixel;
-				int threshold = pImageGrayscale->getBinarizationThreshold();
+				std::vector<int> thresholds = pImageGrayscale->getBinarizationThreshold();
 				
-				for (int y = intHeight - 1; y >= 0; y--)
+				for(int k = 0; k < 9; k++){
+					for (int y = (k+1)*pImageGrayscale->tileHeight - 1; y >= k*pImageGrayscale->tileHeight; y--){
+						for (int x = intWidth - 1; x >= 0; x--){
+							BYTE PixelAtXY = pImageGrayscale->Get8BPPPixel(x, y);
+							if(PixelAtXY >= thresholds[k]){
+								pImageBinary->Put1BPPPixel(x, y, true);
+								pImageConfidence->Put8BPPPixel(x, y, PixelAtXY-thresholds[k]);
+							}
+							else{
+								pImageBinary->Put1BPPPixel(x, y, false);
+								pImageConfidence->Put8BPPPixel(x, y, thresholds[k]-PixelAtXY);
+							}
+						}
+					}
+				}
+
+				for (int y = intHeight - 1; y >= 9*pImageGrayscale->tileHeight; y--){
 					for (int x = intWidth - 1; x >= 0; x--){
 						BYTE PixelAtXY = pImageGrayscale->Get8BPPPixel(x, y);
-						if(PixelAtXY >= threshold){
+						if(PixelAtXY >= thresholds[9]){
 							pImageBinary->Put1BPPPixel(x, y, true);
-							pImageConfidence->Put8BPPPixel(x, y, PixelAtXY-threshold);
+							pImageConfidence->Put8BPPPixel(x, y, PixelAtXY-thresholds[9]);
 						}
 						else{
 							pImageBinary->Put1BPPPixel(x, y, false);
-							pImageConfidence->Put8BPPPixel(x, y, threshold-PixelAtXY);
+							pImageConfidence->Put8BPPPixel(x, y, thresholds[9]-PixelAtXY);
 						}
 					}
+				}
 				
 				//Close direct access
 				pImageBinary->EndDirectAccess();

@@ -163,17 +163,19 @@ protected:
     int intWidth;		// horizontal size of the image in pixels
     int intHeight;		// vertical size of the image in pixels
     unsigned intBPP;
-
+	
+	
     int intLineRasterSize;
 
 private:
     BYTE **pDataMatrix;		// pointer to lines table of image
-	int imageHistogram[256];
+	int imageHistogram[10][256];
     FIBITMAP *fbit;
     bool boolHasDirectAccess, boolIsValid;
 
 public:
-
+	int tileHeight;
+	int lastTileHeight;
     FIBITMAP* Get_FIBITMAP() 
     {
         return this->fbit;
@@ -618,16 +620,21 @@ public:
         return false;
     }
 
-	BYTE getHistogramElement(BYTE index){
-		return imageHistogram[index];
+	BYTE getHistogramElement(BYTE index1, BYTE index2){
+		return imageHistogram[index1][index2];
 	}
 
 	bool initImageHistogram(){
 		if(GetBPP() != 8)
 			return false;
 
-		for (int i = 0; i < 256; i++){
-			imageHistogram[i] = 0;
+		tileHeight = (int)(intHeight/10);
+		lastTileHeight = tileHeight + (intHeight % 10);
+
+		for(int k = 0; k < 10; k++){
+			for (int i = 0; i < 256; i++){
+				imageHistogram[k][i] = 0;
+			}
 		}
 		return true;
 	}
@@ -636,17 +643,26 @@ public:
 		if(GetBPP() != 8)
 			return false;
 
-		for (int y = intHeight - 1; y >= 0; y--){
-            for (int x = intWidth - 1; x >= 0; x--){
+		for(int k = 0; k < 9; k++){
+			for (int y = (k + 1)*tileHeight - 1; y >= k*tileHeight; y--){
+				for (int x = intWidth - 1; x >= 0; x--){
+					BYTE pixel = Get8BPPPixel(x, y);
+					imageHistogram[k][pixel]++;
+				}
+			}
+		}
+
+		for (int y = intHeight - 1; y >= 9*tileHeight; y--){
+			for (int x = intWidth - 1; x >= 0; x--){
 				BYTE pixel = Get8BPPPixel(x, y);
-				imageHistogram[pixel]++;
+				imageHistogram[9][pixel]++;
 			}
 		}
 
 		return true;
 	}
 
-	int getBinarizationThreshold();
+	std::vector<int> getBinarizationThreshold();
 
     static void __GaussianBlurOneChannel(int intImageWidth, int intImageHeight, 
         BYTE ** pLineInput, BYTE ** pLineOutput, double dblRadius); 

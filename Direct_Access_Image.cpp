@@ -275,14 +275,13 @@ bool KImage::GaussianBlur(double dblRadius)
 
 //===========================================================================
 //===========================================================================
-int KImage::getBinarizationThreshold(){
+std::vector<int> KImage::getBinarizationThreshold(){
 	/////////////////////////////////////////
-	//	Determines the binarization threshold 
+	//	Determines the local binarization thresholds
 	//  based on Otsu's algorithm
 	/////////////////////////////////////////
 
-	if(GetBPP() != 8)
-		return -1;
+	std::vector<int> localThresholds;
 
 	int total = intHeight * intWidth;
 	float sum = 0;
@@ -292,32 +291,41 @@ int KImage::getBinarizationThreshold(){
 	float varMax = 0;
 	int threshold = 0;
 	
-	for(int i = 0; i < 256; i++){
-		sum += i * imageHistogram[i];
-	}
+	for(int k = 0; k < 10; k++){
+		if(k == 9)
+			total = lastTileHeight * intWidth;
+		else
+			total = tileHeight * intWidth;
 
-	for(int i = 0; i < 256; i++){
-		wB += imageHistogram[i];
-		if(wB == 0)
-			continue;
-
-		wF = total - wB;
-
-		if(wF == 0)
-			break;
- 
-		sumB += (float)(i*imageHistogram[i]);
-		float mB = sumB/wB;
-		float mF = (sum - sumB)/wF;
-
-		float varBetween = (float)wB * (float)wF * (mB-mF) * (mB-mF);
-		if(varBetween > varMax){
-			varMax = varBetween;
-			threshold = i;
+		for(int i = 0; i < 256; i++){
+			sum += i * imageHistogram[k][i];
 		}
-	}
+
+		for(int i = 0; i < 256; i++){
+			wB += imageHistogram[k][i];
+			if(wB == 0)
+				continue;
+
+			wF = total - wB;
+
+			if(wF == 0)
+				break;
+ 
+			sumB += (float)(i*imageHistogram[k][i]);
+			float mB = sumB/wB;
+			float mF = (sum - sumB)/wF;
+
+			float varBetween = (float)wB * (float)wF * (mB-mF) * (mB-mF);
+			if(varBetween > varMax){
+				varMax = varBetween;
+				threshold = i;
+			}
+		}
         
-    return threshold;
+		localThresholds.push_back(threshold);
+	}
+
+	return localThresholds;
 }
 //===========================================================================
 //===========================================================================
