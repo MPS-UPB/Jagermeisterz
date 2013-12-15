@@ -10,8 +10,71 @@
 //===========================================================================
 #include "stdafx.h"
 #include "Direct_Access_Image.h"
+#include <stdlib.h>
 //===========================================================================
 //===========================================================================
+
+int getMaxNeigh(BYTE **image, int y, int x, int height, int width, int radius) {
+	int max = 0;
+
+	for (int i = y - radius; i < y + radius; i++) {
+		for (int j = x - radius; j < x + radius; j++) {
+			if (i < 0 || i >= height || j < 0 || j >= width) break;
+			if (image[i][j] > max) max = image[i][j];
+		}
+	}
+
+	return max;
+}
+
+int getMinNeigh(BYTE **image, int y, int x, int height, int width, int radius) {
+	int min = 256;
+
+	for (int i = y - radius; i < y + radius; i++) {
+		for (int j = x - radius; j < x + radius; j++) {
+			if (i < 0 || i >= height || j < 0 || j >= width) break;
+			if (image[i][j] < min) min = image[i][j];
+		}
+	}
+ 
+    return min;
+}
+
+int** getBernsenThreshold(BYTE **image, int height, int width) {
+	int **threshold = (int**)malloc(height * sizeof(int *));
+	int **neighMax = (int**)malloc(height * sizeof(int *));
+	int **neighMin = (int**)malloc(height * sizeof(int *));
+	FILE *f1 = fopen("threshold", "w");
+	FILE *f2 = fopen("min", "w");
+	FILE *f3 = fopen("max", "w");
+	FILE *f4 = fopen("original", "w");
+	for (int i = 0; i < height; i++) {
+		threshold[i] = (int*)malloc(width * sizeof(int));
+		neighMax[i] = (int*)malloc(width * sizeof(int));
+		neighMin[i] = (int*)malloc(width * sizeof(int));
+	}
+
+	for (int i = 0; i < height; i++) {
+		for (int j = 0; j < width; j++) {
+			neighMax[i][j] = getMaxNeigh(image, i, j, height, width, 30);
+			neighMin[i][j] = getMinNeigh(image, i, j, height, width, 30);
+			threshold[i][j] = (neighMax[i][j] + neighMin[i][j]) / 2;
+			/*fprintf(f1, "%d ", threshold[i][j]);
+			fprintf(f2, "%d ", neighMax[i][j]);
+			fprintf(f3, "%d ", neighMin[i][j]);
+			fprintf(f4, "%d ", image[i][j]);*/
+		}
+		/*fprintf(f1, "\n");
+		fprintf(f2, "\n");
+		fprintf(f3, "\n");
+		fprintf(f4, "\n");*/
+	}
+	/*fclose(f1);
+	fclose(f2);
+	fclose(f3);
+	fclose(f4);*/
+	return threshold;
+}
 
 //===========================================================================
 //===========================================================================
@@ -57,6 +120,7 @@ int _tmain(int argc, _TCHAR* argv[])
     
     //Request direct access to image pixels in raw format
     BYTE **pDataMatrixGrayscale = NULL;
+	FILE *f = fopen("confidence", "w");
     if (pImageGrayscale->BeginDirectAccess() && (pDataMatrixGrayscale = pImageGrayscale->GetDataMatrix()) != NULL)
     {
         //If direct access is obtained get image attributes and start processing pixels
@@ -67,21 +131,25 @@ int _tmain(int argc, _TCHAR* argv[])
         KImage *pImageBinary = new KImage(intWidth, intHeight, 1);
         if (pImageBinary->BeginDirectAccess())
         {
-            //Apply a threshold at half the grayscale range (0x00 is Full-Black, 0xFF is Full-White, 0x80 is the Middle-Gray)
-            for (int y = intHeight - 1; y >= 0; y--)
+            int **threshold = getBernsenThreshold(pDataMatrixGrayscale, intHeight, intWidth);
+            for (int y = intHeight - 1; y >= 0; y--) {
                 for (int x = intWidth - 1; x >= 0; x--)
                 {
                     //You may use this instead of the line below: 
                     //    BYTE PixelAtXY = pImageGrayscale->Get8BPPPixel(x, y)
                     BYTE &PixelAtXY = pDataMatrixGrayscale[y][x];
-                    if (PixelAtXY < 0x80)
+
+                    if (PixelAtXY < threshold[y][x])
                         //...if closer to black, set to black
                         pImageBinary->Put1BPPPixel(x, y, false);
                     else
                         //...if closer to white, set to white
                         pImageBinary->Put1BPPPixel(x, y, true);
-                }
 
+					fprintf(f, "%d ", abs(PixelAtXY - threshold[y][x]));
+                }
+				fprintf(f, "\n");
+			}
             //Close direct access
             pImageBinary->EndDirectAccess();
             
