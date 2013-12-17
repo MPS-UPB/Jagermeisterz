@@ -18,9 +18,9 @@
 int _tmain(int argc, _TCHAR* argv[])
 {
     //Verify command-line usage correctness
-    if (argc != 3)
+    if (argc != 4)
     {
-        _tprintf(_T("Use: %s <Input_Image_File_Name > <Output_Image_File_Name>\n"), argv[0]);
+        _tprintf(_T("Use: %s <Input_Image_File_Name > <Output_Image_File_Name> <Confidence_Image_Name\n"), argv[0]);
         return -1;
     }
 
@@ -118,7 +118,7 @@ int _tmain(int argc, _TCHAR* argv[])
 				pImageBinary->SaveAs(strNewFileName, SAVE_TIFF_CCITTFAX4);
 
 				//Save confidence image
-				_stprintf_s(strNewFileName, sizeof(strNewFileName) / sizeof(TCHAR), _T("%s_Confidence.TIF"), argv[2]);
+				_stprintf_s(strNewFileName, sizeof(strNewFileName) / sizeof(TCHAR), _T("%s.TIF"), argv[3]);
 				pImageConfidence->SaveAs(strNewFileName, SAVE_TIFF_CCITTFAX4);
 
 				//Delete the binary image and confidence image
