@@ -135,6 +135,7 @@ public class Main {
 					t.start();
 
 					aux.t = t;
+					aux.output = output;
 
 					InputStream is = process.getInputStream();
 					InputStreamReader isr = new InputStreamReader(is);
@@ -157,6 +158,7 @@ public class Main {
 					if (aux.exitCode == 0) {
 						System.out.println("BAM Successfully executed!");
 						String resultImage = aux.output;
+						System.out.println("result img: " + resultImage);
 						ImageFromBAM img = new ImageFromBAM(resultImage);
 						resultImages.add(img);
 					} else {
