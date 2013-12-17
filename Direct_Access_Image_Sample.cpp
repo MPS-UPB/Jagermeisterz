@@ -111,11 +111,6 @@ int _tmain(int argc, _TCHAR* argv[])
 			delete accMatrix;
 			delete imageMatrix;
 			delete pImagePadded;
-			delete squareMatrix;
-			delete accSquareMatrix;
-			delete meanSquareMatrix;
-			delete deviationMatrix;
-			delete thresholdMatrix;
         }
         else
         {
