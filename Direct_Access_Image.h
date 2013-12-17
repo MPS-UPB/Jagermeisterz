@@ -126,6 +126,9 @@ inline BOOL FreeImage_Save_Wrapper(FREE_IMAGE_FORMAT fif, FIBITMAP *dib, const _
 
 #define SAVE_NO_FORMAT				47 // always make sure it has highest values
 
+#define SAUVOLA_M					3
+#define SAUVOLA_N					3
+#define K							0.2
 //===========================================================================
 //===========================================================================
 struct KRGBColor
@@ -616,13 +619,82 @@ public:
         return false;
     }
 
+	KImage* PadImage()
+	{
+		int intWidthPadded = intWidth + SAUVOLA_N;
+		int intHeightPadded = intHeight + SAUVOLA_M;
+	
+		KImage* paddedImage = new KImage(intWidthPadded, intHeightPadded, 8);
+		paddedImage->BeginDirectAccess();
+
+		for (int i = 0; i < intHeight; i++)
+		{
+			for (int j = 0; j < intWidth; j++)
+			{
+				paddedImage->Put8BPPPixel(j + 2, i + 2, Get8BPPPixel(j, i));
+			}
+		}
+
+		for (int i = 0; i < intHeight; i++)
+		{
+			if (i == 0)
+			{
+				paddedImage->Put8BPPPixel(0, 0, Get8BPPPixel(0, i));
+				paddedImage->Put8BPPPixel(0, 1, Get8BPPPixel(0, i));
+				paddedImage->Put8BPPPixel(1, 0, Get8BPPPixel(0, i));
+				paddedImage->Put8BPPPixel(1, 1, Get8BPPPixel(0, i));
+
+				paddedImage->Put8BPPPixel(0, intHeightPadded - 1, Get8BPPPixel(0, intHeight - 1));
+				paddedImage->Put8BPPPixel(1, intHeightPadded - 1, Get8BPPPixel(0, intHeight - 1));
+
+				paddedImage->Put8BPPPixel(intWidthPadded - 1, 0, Get8BPPPixel(intWidth - 1, 0));
+				paddedImage->Put8BPPPixel(intWidthPadded - 1, 1, Get8BPPPixel(intWidth - 1, 0));
+
+				paddedImage->Put8BPPPixel(intWidthPadded - 1, intHeightPadded - 1, Get8BPPPixel(intWidth - 1, intHeight - 1));
+			}
+
+			paddedImage->Put8BPPPixel(0, i + 2, Get8BPPPixel(0, i));
+			paddedImage->Put8BPPPixel(1, i + 2, Get8BPPPixel(0, i));
+
+			paddedImage->Put8BPPPixel(intWidthPadded - 1, i + 2, Get8BPPPixel(intWidth - 1, i));
+		}
+
+		for (int j = 0; j < intWidth; j++)
+		{
+			paddedImage->Put8BPPPixel(j + 2, 0, Get8BPPPixel(j, 0));
+			paddedImage->Put8BPPPixel(j + 2, 1, Get8BPPPixel(j, 0));
+
+			paddedImage->Put8BPPPixel(j + 2, intHeightPadded - 1, Get8BPPPixel(j, intHeight - 1));
+		}
+
+		return paddedImage;
+	}
+
+	double** ConvertToDouble()
+	{
+		double** matrix = new double*[intHeight];
+		for (int i = 0; i < intHeight; i++)
+		{
+			matrix[i] = new double[intWidth];
+		}
+
+		for (int i = 0; i < intHeight; i++)
+		{
+			for (int j = 0; j < intWidth; j++)
+			{
+				matrix[i][j] = (double)Get8BPPPixel(j, i);
+			}
+		}
+
+		return matrix;
+	}
+
     static void __GaussianBlurOneChannel(int intImageWidth, int intImageHeight, 
         BYTE ** pLineInput, BYTE ** pLineOutput, double dblRadius); 
     bool GaussianBlur(double dblRadius);
 };
 //===========================================================================
 //===========================================================================
-
 //===========================================================================
 //===========================================================================
 #endif //__DIRECT_ACCESS_IMAGE__H__

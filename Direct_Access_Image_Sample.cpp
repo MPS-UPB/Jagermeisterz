@@ -10,11 +10,13 @@
 //===========================================================================
 #include "stdafx.h"
 #include "Direct_Access_Image.h"
+#include "Helper.h"
 //===========================================================================
 //===========================================================================
 
 //===========================================================================
 //===========================================================================
+
 int _tmain(int argc, _TCHAR* argv[])
 {
     //Verify command-line usage correctness
@@ -67,23 +69,37 @@ int _tmain(int argc, _TCHAR* argv[])
         KImage *pImageBinary = new KImage(intWidth, intHeight, 1);
         if (pImageBinary->BeginDirectAccess())
         {
-            //Apply a threshold at half the grayscale range (0x00 is Full-Black, 0xFF is Full-White, 0x80 is the Middle-Gray)
-            for (int y = intHeight - 1; y >= 0; y--)
-                for (int x = intWidth - 1; x >= 0; x--)
-                {
-                    //You may use this instead of the line below: 
-                    //    BYTE PixelAtXY = pImageGrayscale->Get8BPPPixel(x, y)
-                    BYTE &PixelAtXY = pDataMatrixGrayscale[y][x];
-                    if (PixelAtXY < 0x80)
-                        //...if closer to black, set to black
-                        pImageBinary->Put1BPPPixel(x, y, false);
-                    else
-                        //...if closer to white, set to white
-                        pImageBinary->Put1BPPPixel(x, y, true);
-                }
+			KImage *pImagePadded = pImageGrayscale->PadImage();
+			double **imageMatrix = pImagePadded->ConvertToDouble();
+			double **accMatrix = AccumulateMatrix(imageMatrix, intHeight, intWidth);
+			double **meanMatrix = CalculateMeanMatrix(accMatrix, intWidth, intHeight);
+
+			double **squareMatrix = SquareMatrix(imageMatrix, intHeight + SAUVOLA_N, intWidth + SAUVOLA_M);
+			double **accSquareMatrix = AccumulateMatrix(squareMatrix,intHeight, intWidth);
+			double **meanSquareMatrix = CalculateMeanMatrix(accSquareMatrix, intWidth, intHeight);
+
+			double **deviationMatrix = CalculateDeviation(meanMatrix, meanSquareMatrix, intWidth, intHeight);
+			double R = CalculateMaximum(deviationMatrix, intWidth, intHeight);
+			double **thresholdMatrix = CalculateThreshold(meanMatrix, deviationMatrix, R, K, intHeight, intWidth);
+
+			for (int i = 0; i < intHeight; i++)
+			{
+				for (int j = 0; j < intWidth; j++)
+				{
+					if ((double)pImageGrayscale->Get8BPPPixel(j, i) > thresholdMatrix[i][j])
+					{
+						pImageBinary->Put1BPPPixel(j, i, true);
+					}
+					else
+					{
+						pImageBinary->Put1BPPPixel(j, i, false);
+					}
+				}
+			}
 
             //Close direct access
             pImageBinary->EndDirectAccess();
+			pImagePadded->EndDirectAccess();
             
             //Save binarized image
             _stprintf_s(strNewFileName, sizeof(strNewFileName) / sizeof(TCHAR), _T("%s_Black_and_White.TIF"), argv[0]);
@@ -91,6 +107,15 @@ int _tmain(int argc, _TCHAR* argv[])
 
             //Don't forget to delete the binary image
             delete pImageBinary;
+			delete meanMatrix;
+			delete accMatrix;
+			delete imageMatrix;
+			delete pImagePadded;
+			delete squareMatrix;
+			delete accSquareMatrix;
+			delete meanSquareMatrix;
+			delete deviationMatrix;
+			delete thresholdMatrix;
         }
         else
         {
