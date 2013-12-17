@@ -17,6 +17,11 @@ public class ImageFromBAM {
 		this.resultImagePath = path;
 	}
 
+	public ImageFromBAM(BufferedImage image) {
+		this.image = image;
+		confTIF = null;
+	}
+	
 	public void readImage() throws IOException {
 		File f = new File(resultImagePath);
 		image = ImageIO.read(f);
@@ -27,43 +32,10 @@ public class ImageFromBAM {
 	}
 
 	public void readConf() throws IOException {
-		String filepath = resultImagePath.replace(".tif", "_conf.tif");
-		System.out.println(filepath);
-		File f = new File(filepath);
+		//String filepath = resultImagePath.replace(".tif", "_conf.tif");
+		System.out.println(resultImagePath);
+		File f = new File(resultImagePath);
 		confTIF = ImageIO.read(f);	
 	}
-
-	/*
-	public void readConf() throws Exception {
-		String filepath = resultImagePath.replace(".tif", "_conf");
-		System.out.println(filepath);
-
-		Integer width, height;
-        conf = new HashMap<Integer, ArrayList<Integer>>();
-        BufferedReader bufferRead = new BufferedReader(new FileReader(filepath));
-        String line;
-        line = bufferRead.readLine();
-
-        String[] tokens = line.split(" ");
-
-        width = Integer.parseInt(tokens[0]);
-        height = Integer.parseInt(tokens[1]);
-
-        for (int i = 0; i < height; i++) {
-        	ArrayList<Integer> currentLine = new ArrayList<Integer>();
-        	line = bufferRead.readLine();
-        	tokens = line.split(" ");
-        	if (tokens.length != width) {
-        		throw new Exception();
-        	}
-        	for (int j = 0; j < width; j++) {
-        		currentLine.add(Integer.parseInt(tokens[j]));
-        	}
-        	conf.put(i, currentLine);
-        }
-
-        bufferRead.close();
-	}
-	 */
 
 }
