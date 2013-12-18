@@ -33,7 +33,7 @@ def executeBinarization():
         for filename in filenames:
             print "Executing binarization for image <", filename ,">..."
             start = time.time()
-            subprocess.check_call([sys.argv[1], sys.argv[2] + '\\' + filename, sys.argv[3]])
+            subprocess.check_call([sys.argv[1], sys.argv[2] + '\\' + filename, sys.argv[3], sys.argv[4]])
             print "Binarization complete!"
 
             verifyOutput();
@@ -47,7 +47,7 @@ def executeBinarization():
 def verifyOutput():
     print "Checking output..."
     outputImage = sys.argv[3] + ".TIF"
-    confidenceImage = sys.argv[3] + "_confidence.TIF"
+    confidenceImage = sys.argv[4] + ".TIF"
 
     if(os.path.isfile(outputImage)):
         print "Binary image has been created!"
@@ -66,18 +66,19 @@ def verifyOutput():
 def cleanOutput():
     print "Removing output images..."
     outputImage = sys.argv[3] + ".TIF"
-    confidenceImage = sys.argv[3] + "_confidence.TIF"
+    confidenceImage = sys.argv[4] + ".TIF"
     os.remove(outputImage)
     os.remove(confidenceImage)
     print "Test finished"
     print ""
 
 if __name__=="__main__":
-    if len(sys.argv) != 4:
-        print "Usage: ", sys.argv[0], "<binarization_exec> <input_images_directory> <output_image_name>"
+    if len(sys.argv) != 5:
+        print "Usage: ", sys.argv[0], "<binarization_exec> <input_images_directory> <output_image_name> <confidence_image_name>"
         print "<binarization_exec> -> Name of the binarization executble"
         print "<input_image_name>  -> Name of the folder containing the images to be binarized"
         print "<output_image_name> -> Name of the binary image"
+        print "<confidence_image_name> -> Name of the confidence image"
         sys.exit()
 
     if (not argumentsValidation()):
