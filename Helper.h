@@ -1,7 +1,7 @@
 #include <math.h>
 
-#define SAUVOLA_M		3
-#define SAUVOLA_N		3
+#define SAUVOLA_M		7
+#define SAUVOLA_N		7
 
 void CalculateDifference(double** matrix1, double** matrix2, int intWidth, int intHeight)
 {

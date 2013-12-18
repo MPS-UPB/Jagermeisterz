@@ -82,15 +82,16 @@ int _tmain(int argc, _TCHAR* argv[])
 			{
 				for (int j = 0; j < intWidth; j++)
 				{
+					BYTE confidencePixel = (BYTE)thresholdMatrix[i][j];
 					if ((double)pImageGrayscale->Get8BPPPixel(j, i) > thresholdMatrix[i][j])
 					{
 						pImageBinary->Put1BPPPixel(j, i, true);
-						pConfidenceImage->Put8BPPPixel(j, i, 0x00);
+						pConfidenceImage->Put8BPPPixel(j, i,pImageGrayscale->Get8BPPPixel(j, i) - confidencePixel);
 					}
 					else
 					{
 						pImageBinary->Put1BPPPixel(j, i, false);
-						pConfidenceImage->Put8BPPPixel(j, i, 0xFF);
+						pConfidenceImage->Put8BPPPixel(j, i, confidencePixel - pImageGrayscale->Get8BPPPixel(j, i));
 					}
 				}
 			}
@@ -101,10 +102,10 @@ int _tmain(int argc, _TCHAR* argv[])
 			pConfidenceImage->EndDirectAccess();
 
 			//Save binarized image
-			_stprintf_s(strNewFileName, sizeof(strNewFileName) / sizeof(TCHAR), _T("%s.TIF"), argv[2]);
+			_stprintf_s(strNewFileName, sizeof(strNewFileName) / sizeof(TCHAR), argv[2]);
 			pImageBinary->SaveAs(strNewFileName, SAVE_TIFF_CCITTFAX4);
 
-			_stprintf_s(strNewFileName, sizeof(strNewFileName) / sizeof(TCHAR), _T("%s.TIF"), argv[3]);
+			_stprintf_s(strNewFileName, sizeof(strNewFileName) / sizeof(TCHAR), argv[3]);
 			pImageBinary->SaveAs(strNewFileName, SAVE_TIFF_LZW);
 
 			//Don't forget to delete the binary image

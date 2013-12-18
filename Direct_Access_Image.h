@@ -126,8 +126,8 @@ inline BOOL FreeImage_Save_Wrapper(FREE_IMAGE_FORMAT fif, FIBITMAP *dib, const _
 
 #define SAVE_NO_FORMAT				47 // always make sure it has highest values
 
-#define SAUVOLA_M					3
-#define SAUVOLA_N					3
+#define SAUVOLA_M					7
+#define SAUVOLA_N					7
 #define K							0.2
 //===========================================================================
 //===========================================================================
