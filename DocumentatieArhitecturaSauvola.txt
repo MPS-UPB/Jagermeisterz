@@ -1,0 +1,12 @@
+Jagermeisterz - BAM R&I
+	Fotea Ioana 342C5
+	Tapus Florin-Radu 342C5
+	
+Algortimul Sauvola
+Implementarea a pornit de la sheletul de cod de pe cs.curs. Am ales algoritmul lui Sauvola pentru binarizarea de imagini.
+Acesta porneste de la o imagine grayscale si calculeaza un threshold local luand in considerare M * N pixeli vecini (am ales sa folosim 7 * 7).
+Pentru pixelii de pe margine, la imagine mai sunt adaugate linii si coloane identice cu liniile si coloanele de pe marginea imaginii initiale.
+
+Dupa calcularea matricii de threshold, este construita imaginea alb-negru. Se deseneaza un pixel negru daca valoarea din imaginea initiala este mai mica decat
+valoarea din matricea de threshold si se deseneaza un pixel alb in caz contrar. Pentru matricea de confidente, am ales sa folosim pentru fiecare pixel diferenta
+dintre threshold si valoarea initiala a pixelului.
